@@ -394,22 +394,32 @@ void update() {
         
         if (playerHeli.fuel <= 0 && agl <= 0.6f) { gameState=2; soundRunning=0; }
         
-        // Refueling logic with limit
+        // Refueling logic: Must be sitting still on the pad or the canopy roof
         int atFuelStation = -1;
-        if (agl < 1.0f) {
+        float heliSpeed = (float)fabs(playerHeli.velocity_fwd);
+        
+        // Check if landed on pad (agl < 0.3) OR landed on canopy roof (agl ~2.95)
+        int isLanded = (agl < 0.3f) || (agl > 2.6f && agl < 3.2f);
+
+        if (isLanded && heliSpeed < 0.5f) {
             for(int i=0; i<NUM_FUEL_STATIONS; i++) {
                 float dx=playerHeli.x-fuelStations[i].x, dz=playerHeli.z-fuelStations[i].z;
-                if (sqrt(dx*dx+dz*dz)<4.5f) { atFuelStation=i; break; }
+                // Station footprint is ~4.5 units
+                if (sqrt(dx*dx+dz*dz) < 3.5f) { atFuelStation=i; break; }
             }
         }
+        
         if (atFuelStation >= 0 && playerHeli.fuel < 99.0f) {
             if (!isRefuelingThisSession && playerHeli.refuels_left > 0) {
                 playerHeli.refuels_left--; isRefuelingThisSession = 1;
+                #ifdef _WIN32
+                Beep(600, 100); Beep(800, 150);
+                #endif
             }
             if (isRefuelingThisSession) {
-                playerHeli.fuel += 20.0f * dt; if(playerHeli.fuel>100) playerHeli.fuel=100;
+                playerHeli.fuel += 25.0f * dt; if(playerHeli.fuel > 100) playerHeli.fuel = 100;
             }
-        } else if (atFuelStation == -1 || playerHeli.fuel >= 100.0f || agl > 1.2f) {
+        } else if (atFuelStation == -1 || playerHeli.fuel >= 100.0f || !isLanded || heliSpeed > 0.6f) {
             isRefuelingThisSession = 0;
         }
 
@@ -444,9 +454,9 @@ void keyDown(unsigned char key, int x, int y) {
     }
 
     if (gameState == 0) {
-        if (key == '3') { playerHeli.total_targets = 3; playerHeli.time_remaining = 180.0f; gameState = 1; }
-        else if (key == '5') { playerHeli.total_targets = 5; playerHeli.time_remaining = 300.0f; gameState = 1; }
-        else if (key == '8') { playerHeli.total_targets = 8; playerHeli.time_remaining = 420.0f; gameState = 1; }
+        if (key == '3') { playerHeli.total_targets = 3; playerHeli.time_remaining = 90.0f; gameState = 1; }
+        else if (key == '5') { playerHeli.total_targets = 5; playerHeli.time_remaining = 150.0f; gameState = 1; }
+        else if (key == '8') { playerHeli.total_targets = 8; playerHeli.time_remaining = 240.0f; gameState = 1; }
         return;
     }
     keyStates[key] = 1;
