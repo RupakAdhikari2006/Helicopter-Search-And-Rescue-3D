@@ -341,6 +341,57 @@ void update() {
             }
         }
         
+        // --- Object Collision Detection (Trees/Rocks) ---
+        if (gameState == 1 && playerHeli.engine_on >= 1) {
+            // Check Trees
+            for (int i = 0; i < NUM_TREES; i++) {
+                if (trees[i].x > 900.0f) continue; // Skip uninitialized
+                
+                float dx = playerHeli.x - trees[i].x;
+                float dz = playerHeli.z - trees[i].z;
+                float distSq = dx*dx + dz*dz;
+                
+                // Collision radius depends on tree scale
+                float colRadius = 1.0f + (trees[i].scale * 0.6f); 
+                if (distSq < colRadius * colRadius) {
+                    float groundH = getTerrainHeight(trees[i].x, trees[i].z);
+                    float treeTop = groundH + (trees[i].scale * 3.5f);
+                    
+                    // If heli is below the top of the tree, CRASH!
+                    if (playerHeli.y < treeTop && playerHeli.y > groundH) {
+                        gameState = 6; soundRunning = 0;
+                        #ifdef _WIN32
+                        Beep(350, 400); Beep(200, 800);
+                        #endif
+                        break;
+                    }
+                }
+            }
+            
+            // Check Rocks
+            if (gameState == 1) { // Only check rocks if not already crashed
+                for (int i = 0; i < NUM_ROCKS; i++) {
+                    float dx = playerHeli.x - rocks[i].x;
+                    float dz = playerHeli.z - rocks[i].z;
+                    float distSq = dx*dx + dz*dz;
+                    
+                    float colRadius = 0.8f + (rocks[i].scale * 0.8f);
+                    if (distSq < colRadius * colRadius) {
+                        float groundH = getTerrainHeight(rocks[i].x, rocks[i].z);
+                        float rockTop = groundH + (rocks[i].scale * 1.2f);
+                        
+                        if (playerHeli.y < rockTop && playerHeli.y > groundH - 1.0f) {
+                            gameState = 6; soundRunning = 0;
+                            #ifdef _WIN32
+                            Beep(350, 400); Beep(200, 800);
+                            #endif
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
         if (playerHeli.fuel <= 0 && agl <= 0.6f) { gameState=2; soundRunning=0; }
         
         // Refueling logic with limit
