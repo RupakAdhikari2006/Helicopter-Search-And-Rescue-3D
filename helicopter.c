@@ -106,109 +106,123 @@ void drawHelicopter(Helicopter* heli) {
     glRotatef(heli->rot_x, 1, 0, 0);
     glRotatef(heli->rot_z, 0, 0, 1);
 
-    // Main Body — Army Olive Drab
-    float mat_amb_body[] = { 0.18f, 0.20f, 0.10f, 1.0f };
-    float mat_diff_body[] = { 0.32f, 0.37f, 0.15f, 1.0f };
+    // Main Body — Bronze/Steampunk Gyrocopter
+    float mat_amb_body[] = { 0.25f, 0.15f, 0.05f, 1.0f }; // Dark bronze ambient
+    float mat_diff_body[] = { 0.55f, 0.35f, 0.15f, 1.0f }; // Shiny bronze diffuse
     glMaterialfv(GL_FRONT, GL_AMBIENT, mat_amb_body);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diff_body);
     
+    // Barrel-like rounded body
     glPushMatrix();
-    glScalef(1.0f, 0.8f, 1.4f);
-    glutSolidSphere(1.0, 32, 32);
+    glScalef(1.1f, 0.9f, 1.3f);
+    glutSolidSphere(1.0, 24, 24);
     glPopMatrix();
     
-    // Cockpit windshield (semi-transparent blue-green)
-    float mat_glass[] = { 0.2f, 0.4f, 0.5f, 0.6f };
+    // Engine boiler (Golden backpiece)
+    float mat_diff_gold[] = { 0.8f, 0.6f, 0.2f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diff_gold);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.2f, -1.0f);
+    glScalef(0.6f, 0.6f, 0.8f);
+    glutSolidSphere(1.0, 16, 16);
+    glPopMatrix();
+    
+    // Cockpit windshield (Brass piping / thick glass)
+    float mat_glass[] = { 0.3f, 0.6f, 0.7f, 0.5f };
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mat_glass);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
-    glTranslatef(0.0f, 0.15f, 1.0f);
-    glScalef(0.6f, 0.5f, 0.4f);
+    glTranslatef(0.0f, 0.25f, 0.8f);
+    glScalef(0.7f, 0.6f, 0.5f);
     glutSolidSphere(1.0, 16, 16);
     glPopMatrix();
     glDisable(GL_BLEND);
     
-    // Tail Boom
-    float mat_amb_dark[] = { 0.15f, 0.15f, 0.08f, 1.0f };
-    float mat_diff_dark[] = { 0.28f, 0.30f, 0.15f, 1.0f };
-    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_amb_dark);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diff_dark);
+    // Tail Boom - Wooden log/shaft
+    float mat_amb_wood[] = { 0.2f, 0.1f, 0.05f, 1.0f };
+    float mat_diff_wood[] = { 0.4f, 0.2f, 0.1f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_amb_wood);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diff_wood);
 
     glPushMatrix();
-    glTranslatef(0, 0.2f, -1.0f);
-    drawCylinder(0.15f, 2.0f);
+    glTranslatef(0, 0.2f, -1.2f);
+    drawCylinder(0.12f, 1.8f);
     glPopMatrix();
     
-    // Tail vertical fin
+    // Tail vertical fin - Wooden fin
     glPushMatrix();
-    glTranslatef(0, 0.2f, -3.0f);
-    glRotatef(-45.0f, 1, 0, 0);
-    glScalef(0.1f, 1.0f, 0.5f);
+    glTranslatef(0, 0.4f, -2.8f);
+    glRotatef(-20.0f, 1, 0, 0);
+    glScalef(0.08f, 1.2f, 0.4f);
     glutSolidCube(1.0);
     glPopMatrix();
 
-    // Horizontal stabilizer
+    // Horizontal stabilizer - Double wooden wings
     glPushMatrix();
-    glTranslatef(0, 0.3f, -2.7f);
-    glScalef(1.2f, 0.08f, 0.3f);
+    glTranslatef(0, 0.3f, -2.5f);
+    glScalef(1.5f, 0.08f, 0.3f);
     glutSolidCube(1.0);
     glPopMatrix();
 
-    // Rotor mast
+    // Rotor mast - Thick iron/bronze pole
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diff_body);
     glPushMatrix();
     glTranslatef(0, 0.8f, 0);
     glRotatef(-90, 1, 0, 0);
-    drawCylinder(0.1f, 0.3f);
+    drawCylinder(0.15f, 0.4f);
     glPopMatrix();
     
-    // Main Rotor Blades
+    // Main Rotor Blades (Steampunk Canvas Wings)
     glPushMatrix();
-    glTranslatef(0, 1.1f, 0);
+    glTranslatef(0, 1.2f, 0);
     glRotatef(heli->main_rotor_angle, 0, 1, 0);
     
     float mat_spec[] = { 1, 1, 1, 1 };
-    float mat_diff_rotor[] = { 0.7f, 0.7f, 0.7f, 1 };
+    float mat_diff_rotor[] = { 0.8f, 0.7f, 0.5f, 1 }; // Canvas color
     glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diff_rotor);
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_spec);
-    glMaterialf(GL_FRONT, GL_SHININESS, 50.0f);
+    glMaterialf(GL_FRONT, GL_SHININESS, 20.0f);
     
     for (int i = 0; i < 4; i++) {
         glPushMatrix();
         glRotatef(90.0f * i, 0, 1, 0);
-        glTranslatef(0, 0, 1.5f);
-        glScalef(0.2f, 0.05f, 3.0f);
+        glTranslatef(0, 0, 1.6f);
+        // Canvas stretched over wooden frame
+        glScalef(0.4f, 0.05f, 3.2f);
         glutSolidCube(1.0);
         glPopMatrix();
     }
     glPopMatrix();
     
-    // Tail Rotor
-    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_amb_dark);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diff_dark);
+    // Tail Rotor (Wooden propeller)
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_amb_wood);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diff_wood);
     
     glPushMatrix();
-    glTranslatef(0.15f, 0.4f, -2.8f);
+    glTranslatef(0.15f, 0.5f, -2.8f);
     glRotatef(heli->tail_rotor_angle, 1, 0, 0);
     for (int i = 0; i < 2; i++) {
         glPushMatrix();
         glRotatef(90.0f * i, 1, 0, 0);
-        glTranslatef(0, 0.4f, 0);
-        glScalef(0.05f, 0.8f, 0.1f);
+        glTranslatef(0, 0.5f, 0);
+        glScalef(0.08f, 1.0f, 0.15f);
         glutSolidCube(1.0);
         glPopMatrix();
     }
     glPopMatrix();
     
-    // Landing Skids
-    glPushMatrix(); glTranslatef(0.5f, -0.6f, -0.5f); drawCylinder(0.05f, 2.0f); glPopMatrix();
-    glPushMatrix(); glTranslatef(-0.5f, -0.6f, -0.5f); drawCylinder(0.05f, 2.0f); glPopMatrix();
+    // Landing Skids (Iron sleds)
+    float mat_iron[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_iron);
+    glPushMatrix(); glTranslatef(0.6f, -0.7f, -0.6f); drawCylinder(0.08f, 2.2f); glPopMatrix();
+    glPushMatrix(); glTranslatef(-0.6f, -0.7f, -0.6f); drawCylinder(0.08f, 2.2f); glPopMatrix();
     
-    // Struts
-    glPushMatrix(); glTranslatef(0.5f, -0.6f, 0);  glRotatef(-45, 0,0,1); drawCylinder(0.05f, 0.5f); glPopMatrix();
-    glPushMatrix(); glTranslatef(-0.5f, -0.6f, 0);  glRotatef(45, 0,0,1);  drawCylinder(0.05f, 0.5f); glPopMatrix();
-    glPushMatrix(); glTranslatef(0.5f, -0.6f, 1.0f); glRotatef(-45, 0,0,1); drawCylinder(0.05f, 0.5f); glPopMatrix();
-    glPushMatrix(); glTranslatef(-0.5f, -0.6f, 1.0f); glRotatef(45, 0,0,1);  drawCylinder(0.05f, 0.5f); glPopMatrix();
+    // Struts (Iron scaffolding)
+    glPushMatrix(); glTranslatef(0.6f, -0.7f, 0);  glRotatef(-45, 0,0,1); drawCylinder(0.06f, 0.7f); glPopMatrix();
+    glPushMatrix(); glTranslatef(-0.6f, -0.7f, 0);  glRotatef(45, 0,0,1);  drawCylinder(0.06f, 0.7f); glPopMatrix();
+    glPushMatrix(); glTranslatef(0.6f, -0.7f, 1.0f); glRotatef(-45, 0,0,1); drawCylinder(0.06f, 0.7f); glPopMatrix();
+    glPushMatrix(); glTranslatef(-0.6f, -0.7f, 1.0f); glRotatef(45, 0,0,1);  drawCylinder(0.06f, 0.7f); glPopMatrix();
 
     // Searchlight (underneath, first person visible cone)
     float mat_light[] = { 1.0f, 1.0f, 0.8f, 1.0f };

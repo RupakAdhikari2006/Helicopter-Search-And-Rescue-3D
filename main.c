@@ -74,35 +74,33 @@ static void drawIntroStory() {
     float x = window_width / 2 - 270;
     float y = window_height - 120;
     
-    glColor3f(0, 0.9f, 1); renderTextBig(x + 70, y, "OPERATION: FOUR HORIZONS");
+    glColor3f(1.0f, 0.8f, 0.2f); renderTextBig(x + 50, y, "THE QUEST FOR EREBOR");
     y -= 60;
     
     glColor3f(0.8f, 0.8f, 0.8f);
-    renderText(x, y, "A cataclysmic spatial anomaly has fractured the region into");
+    renderText(x, y, "A great darkness has fallen over the Lonely Mountain.");
     y -= 30;
-    renderText(x, y, "four extreme biomes: the Frozen North, Tropical South,");
+    renderText(x, y, "Thorin's Company of Dwarves has been scattered across the");
     y -= 30;
-    renderText(x, y, "Arid Eastern Canyons, and the Marshy Western Swamplands.");
+    renderText(x, y, "perilous lands of Middle-earth by the dragon Smaug's wrath.");
     y -= 50;
     
-    renderText(x, y, "A research expedition has been scattered across these");
+    renderText(x, y, "From the lush hills of the Shire to the freezing peaks");
     y -= 30;
-    renderText(x, y, "hazardous terrains. With dangerous localized weather fronts");
-    y -= 30;
-    renderText(x, y, "closing in, they will not survive the night.");
+    renderText(x, y, "of the Misty Mountains, they wait for rescue.");
     y -= 50;
 
     glColor3f(1.0f, 0.4f, 0.1f);
-    renderText(x, y, "As the elite pilot of the Rescue Initiative, you must navigate");
+    renderText(x, y, "As the master engineer of the Dwarven Gyrocopter, you must");
     y -= 30;
-    renderText(x, y, "these surreal landscapes. Extract every survivor before");
+    renderText(x, y, "navigate these hazardous realms. Gather your kin before");
     y -= 30;
-    renderText(x, y, "the unstable biomes collapse onto themselves.");
+    renderText(x, y, "the Orc packs find them in the wilderness.");
     y -= 80;
 
     float blink = 0.5f + 0.5f * (float)sin(glutGet(GLUT_ELAPSED_TIME)*0.005f);
-    glColor4f(1, 1, 1, blink);
-    renderText(window_width/2 - 120, y, "Press [ENTER] to Begin Extraction");
+    glColor4f(1, 0.9f, 0.5f, blink);
+    renderText(window_width/2 - 140, y, "Press [ENTER] to Begin the Journey");
 }
 
 void processInput() {
@@ -151,12 +149,12 @@ void drawHUD() {
     // --- Startup Menu ---
     if (gameState == 0) {
         glColor4f(0, 0, 0, 0.8f); drawRect(0, 0, window_width, window_height);
-        glColor3f(0, 0.9f, 1); renderTextBig(window_width/2 - 220, window_height/2 + 120, "H.S.R. MISSION SELECT");
-        glColor3f(1, 1, 1); renderText(window_width/2 - 130, window_height/2 + 40, "Select Target Extraction Goal:");
+        glColor3f(1.0f, 0.8f, 0.2f); renderTextBig(window_width/2 - 200, window_height/2 + 120, "GATHER THE COMPANY");
+        glColor3f(1, 1, 1); renderText(window_width/2 - 130, window_height/2 + 40, "Select Difficulty Requirements:");
         
-        glColor3f(0.6f, 1.0f, 0.6f); renderText(window_width/2 - 100, window_height/2 - 10, "[3]  Priority Alpha (3:00)");
-        glColor3f(1.0f, 1.0f, 0.5f); renderText(window_width/2 - 100, window_height/2 - 50, "[5]  Priority Bravo (5:00)");
-        glColor3f(1.0f, 0.5f, 0.5f); renderText(window_width/2 - 100, window_height/2 - 90, "[8]  Priority Delta (7:00)");
+        glColor3f(0.6f, 1.0f, 0.6f); renderText(window_width/2 - 120, window_height/2 - 10, "[3]  Scouting Party (3 Dwarves, 3:00)");
+        glColor3f(1.0f, 1.0f, 0.5f); renderText(window_width/2 - 120, window_height/2 - 50, "[5]  Main Expedition (5 Dwarves, 5:00)");
+        glColor3f(1.0f, 0.5f, 0.5f); renderText(window_width/2 - 120, window_height/2 - 90, "[8]  Thorin's Full Co. (8 Dwarves, 7:00)");
         goto hud_end;
     }
 
@@ -166,13 +164,13 @@ void drawHUD() {
         goto hud_end;
     }
     glColor4f(0, 0, 0, 0.6f); drawRect(0, window_height - 90, window_width, 90);
-    glColor3f(0, 0.9f, 1); renderText(15, window_height - 25, "MISSION ACTIVE");
+    glColor3f(1.0f, 0.8f, 0.2f); renderText(15, window_height - 25, "JOURNEY UNDERWAY");
     
     char status[128];
-    if (playerHeli.engine_on == 0) sprintf(status, "ENGINE: OFF");
-    else if (playerHeli.engine_on == 1) sprintf(status, "ENGINE: STARTING...");
-    else if (playerHeli.engine_on == 2) sprintf(status, "ENGINE: RUNNING");
-    else sprintf(status, "ENGINE: STOPPING...");
+    if (playerHeli.engine_on == 0) sprintf(status, "STEAM ENGINE: OFF");
+    else if (playerHeli.engine_on == 1) sprintf(status, "STEAM ENGINE: HEATING...");
+    else if (playerHeli.engine_on == 2) sprintf(status, "STEAM ENGINE: RUNNING");
+    else sprintf(status, "STEAM ENGINE: COOLING...");
     glColor3f(0.8f, 0.8f, 0.8f); renderTextSmall(15, window_height - 45, status);
     
     float terrH = getTerrainHeight(playerHeli.x, playerHeli.z);
@@ -180,7 +178,7 @@ void drawHUD() {
     char altStr[128]; sprintf(altStr, "ALT: %.0f ft | SPD: %.1f kts | AGL: %.0f ft", playerHeli.y*10, playerHeli.velocity_fwd*5, AGL*10);
     glColor3f(0.7f, 1, 0.7f); renderTextSmall(15, window_height - 62, altStr);
     
-    char rescuedStr[64]; sprintf(rescuedStr, "RESCUED: %d / %d", playerHeli.passengers, playerHeli.total_targets);
+    char rescuedStr[64]; sprintf(rescuedStr, "DWARVES GATHERED: %d / %d", playerHeli.passengers, playerHeli.total_targets);
     glColor3f(1, 1, 0); renderText(15, window_height - 85, rescuedStr);
     
     int mins = (int)(playerHeli.game_time / 60); int secs = (int)(playerHeli.game_time) % 60;
@@ -210,18 +208,18 @@ void drawHUD() {
         glColor4f(0.2f,0.2f,0.2f,0.7f); drawRect(barX, barY, barW, barH);
         float r, g; if (fuelPct > 0.5f) { g=1; r=(1-fuelPct)*2; } else { r=1; g=fuelPct*2; }
         glColor4f(r, g, 0, 0.8f); drawRect(barX+2, barY+2, barW-4, (barH-4)*fuelPct);
-        glColor3f(1,1,1); renderTextSmall(barX, barY+barH+5, "FUEL");
+        glColor3f(1,1,1); renderTextSmall(barX, barY+barH+5, "COAL");
         char fstr[16]; sprintf(fstr, "%.0f%%", playerHeli.fuel); renderTextSmall(barX, barY-15, fstr);
         
-        char refStr[32]; sprintf(refStr, "REFUELS: %d", playerHeli.refuels_left);
+        char refStr[32]; sprintf(refStr, "REFILLS: %d", playerHeli.refuels_left);
         glColor3f(1, 0.5f, 0); renderTextSmall(barX, barY-35, refStr);
         
         if (isRefuelingThisSession) {
             float b = 0.5f + 0.5f*(float)sin(proximityFlash*12);
-            glColor4f(0, 1, 0, b); renderText(50, barY + barH/2, "REFUELING...");
+            glColor4f(0, 1, 0, b); renderText(50, barY + barH/2, "RELOADING COAL...");
         } else if (playerHeli.fuel < 20 && playerHeli.fuel > 0) {
             float b = 0.5f + 0.5f*(float)sin(proximityFlash*6);
-            glColor4f(1, 0, 0, b); renderText(50, barY + barH/2, "LOW FUEL!");
+            glColor4f(1, 0, 0, b); renderText(50, barY + barH/2, "LOW COAL!");
         }
     }
 
@@ -247,32 +245,32 @@ void drawHUD() {
 
     if (nearPersonIdx >= 0) {
         float b = 0.5f + 0.5f*(float)sin(proximityFlash*8);
-        glColor4f(1, 0.9f, 0, b); renderText(window_width/2-80, window_height/2-60, "! PERSON NEARBY !");
+        glColor4f(1, 0.9f, 0, b); renderText(window_width/2-80, window_height/2-60, "! DWARF NEARBY !");
     }
 
     // Game Over Screens
     if (gameState == 2) {
         glColor4f(0,0,0,0.85f); drawRect(0,0,window_width,window_height);
-        glColor3f(1,0,0); renderTextBig(window_width/2-100, window_height/2+20, "FUEL DEPLETED");
-        glColor3f(1,1,1); renderText(window_width/2-80, window_height/2-20, "[R] Restart Mission");
+        glColor3f(1,0,0); renderTextBig(window_width/2-100, window_height/2+20, "COAL DEPLETED");
+        glColor3f(1,1,1); renderText(window_width/2-80, window_height/2-20, "[R] Restart Journey");
     }
     if (gameState == 3) {
         glColor4f(0,0,0,0.85f); drawRect(0,0,window_width,window_height);
-        glColor3f(0,1,0); renderTextBig(window_width/2-150, window_height/2+50, "MISSION ACCOMPLISHED!");
-        glColor3f(1,1,1); char tstr[64]; sprintf(tstr, "Time: %02d:%02d | Fuel: %.0f%%", mins, secs, playerHeli.fuel);
+        glColor3f(0.8f,0.6f,0); renderTextBig(window_width/2-150, window_height/2+50, "THE COMPANY IS GATHERED!");
+        glColor3f(1,1,1); char tstr[64]; sprintf(tstr, "Time: %02d:%02d | Coal: %.0f%%", mins, secs, playerHeli.fuel);
         renderText(window_width/2-130, window_height/2+10, tstr);
-        renderText(window_width/2-80, window_height/2-40, "[R] Restart Mission");
+        renderText(window_width/2-80, window_height/2-40, "[R] Restart Journey");
     }
     if (gameState == 4) {
         glColor4f(0,0,0,0.85f); drawRect(0,0,window_width,window_height);
-        glColor3f(1,0.2f,0); renderTextBig(window_width/2-110, window_height/2+20, "TIME EXPIRED!");
-        glColor3f(1,1,1); renderText(window_width/2-80, window_height/2-20, "[R] Restart Mission");
+        glColor3f(1,0.2f,0); renderTextBig(window_width/2-110, window_height/2+20, "THE ORCS FOUND THEM!");
+        glColor3f(1,1,1); renderText(window_width/2-80, window_height/2-20, "[R] Restart Journey");
     }
     if (gameState == 6) {
         glColor4f(0.3f,0,0,0.85f); drawRect(0,0,window_width,window_height);
         float blink = 0.5f + 0.5f*(float)sin(proximityFlash*15.0f);
-        glColor3f(1,blink,blink); renderTextBig(window_width/2-150, window_height/2+20, "HELICOPTER CRASHED!");
-        glColor3f(1,1,1); renderText(window_width/2-80, window_height/2-20, "[R] Restart Mission");
+        glColor3f(1,blink,blink); renderTextBig(window_width/2-170, window_height/2+20, "GYROCOPTER DESTROYED!");
+        glColor3f(1,1,1); renderText(window_width/2-80, window_height/2-20, "[R] Restart Journey");
     }
 
 hud_end:
@@ -311,16 +309,32 @@ void update() {
         // Check Terrain Collisions / Refueling
         float agl = playerHeli.y - th;
         
-        // Rigid Crash Physics
-        if (agl <= 0.55f && playerHeli.engine_on >= 1) { // Touched ground while active
+        // Robust Crash Physics
+        if (playerHeli.engine_on >= 1) {
             float impactVel = playerHeli.velocity_ydir;
             float slope = getTerrainSlope(playerHeli.x, playerHeli.z);
             float fwdSpeed = playerHeli.velocity_fwd;
             
-            // If slammed into ground too hard, or flew into a steep mountain, CRASH!
-            if (impactVel < -8.0f || slope > 2.0f || (fwdSpeed > 5.0f && slope > 0.8f)) {
-                gameState = 6;
-                soundRunning = 0;
+            // 1. Vertical / Hard Landing Crash
+            if (agl <= 0.55f) {
+                if (impactVel < -7.0f || slope > 1.5f || (fwdSpeed > 4.0f && slope > 0.6f)) {
+                    gameState = 6; soundRunning = 0;
+                }
+            }
+            
+            // 2. Frontal Collision Check (Hitting a hill/mountain face)
+            // Check a point ~2.5 units in front of the helicopter
+            float rad = playerHeli.rot_y * M_PI / 180.0f;
+            float frontX = playerHeli.x + (float)sin(rad) * 2.5f;
+            float frontZ = playerHeli.z + (float)cos(rad) * 2.5f;
+            float frontHeight = getTerrainHeight(frontX, frontZ);
+            
+            // If the nose of the heli is below the terrain height at that point
+            if (playerHeli.y < frontHeight + 0.3f && fwdSpeed > 2.0f) {
+                gameState = 6; soundRunning = 0;
+            }
+            
+            if (gameState == 6) {
                 #ifdef _WIN32
                 Beep(400, 500); Beep(300, 1000);
                 #endif
@@ -394,14 +408,27 @@ void specialKeyDown(int k, int x, int y) { specialKeyStates[k] = 1; }
 void specialKeyUp(int k, int x, int y) { specialKeyStates[k] = 0; }
 
 void init() {
-    glClearColor(0.1f, 0.25f, 0.55f, 1.0f);
+    // Natural sky blue - not aqua/cyan
+    glClearColor(0.53f, 0.72f, 0.87f, 1.0f);
     glEnable(GL_DEPTH_TEST); glDepthFunc(GL_LEQUAL);
     glEnable(GL_CULL_FACE); glCullFace(GL_BACK); glShadeModel(GL_SMOOTH);
-    glEnable(GL_LIGHTING); glEnable(GL_LIGHT0); glEnable(GL_COLOR_MATERIAL);
-    float l_amb[]={0.25,0.25,0.3,1}, l_dif[]={1,0.95,0.85,1}, l_pos[]={100,250,80,0};
-    glLightfv(GL_LIGHT0, GL_AMBIENT, l_amb); glLightfv(GL_LIGHT0, GL_DIFFUSE, l_dif); glLightfv(GL_LIGHT0, GL_POSITION, l_pos);
-    glEnable(GL_FOG); float fCol[]={0.5,0.7,0.95,1}; glFogfv(GL_FOG_COLOR, fCol);
-    glFogi(GL_FOG_MODE, GL_EXP2); glFogf(GL_FOG_DENSITY, 0.003f);
+    glEnable(GL_LIGHTING); glEnable(GL_LIGHT0);
+    /* GL_COLOR_MATERIAL removed — it caused glColor3f (sky) to override glMaterialfv (terrain) */
+    /* Set a global scene material so objects aren't totally black without explicit materials */
+    float scene_amb[] = {0.6f, 0.65f, 0.55f, 1.0f};
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, scene_amb);
+    // Bright warm sunlight - high ambient so greens are visible even in shadow
+    float l_amb[]={0.55f, 0.60f, 0.50f, 1.0f};   // warm greenish ambient
+    float l_dif[]={1.0f, 0.98f, 0.90f, 1.0f};     // near-white warm sunlight diffuse
+    float l_pos[]={200.0f, 400.0f, 150.0f, 0.0f}; // high sun angle
+    glLightfv(GL_LIGHT0, GL_AMBIENT, l_amb);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, l_dif);
+    glLightfv(GL_LIGHT0, GL_POSITION, l_pos);
+    // Natural outdoor haze fog - warm dusty atmosphere
+    glEnable(GL_FOG);
+    float fCol[] = {0.68f, 0.78f, 0.65f, 1.0f}; // warm greenish-grey haze
+    glFogfv(GL_FOG_COLOR, fCol);
+    glFogi(GL_FOG_MODE, GL_EXP2); glFogf(GL_FOG_DENSITY, 0.0025f);
     resetGame(); lastTime = glutGet(GLUT_ELAPSED_TIME);
 }
 
@@ -409,7 +436,7 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(window_width, window_height);
-    glutCreateWindow("Helicopter Rescue - Island Edition");
+    glutCreateWindow("The Quest for Erebor - A Gyrocopter Adventure");
     init();
     glutDisplayFunc(display); glutReshapeFunc(resize); glutIdleFunc(update);
     glutKeyboardFunc(keyDown); glutKeyboardUpFunc(keyUp);

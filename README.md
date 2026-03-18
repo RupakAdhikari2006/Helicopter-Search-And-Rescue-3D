@@ -1,6 +1,6 @@
-# 3D Helicopter Search & Rescue
+# The Quest for Erebor: A 3D Gyrocopter Adventure
 
-A 3D OpenGL helicopter game powered by `freeglut` where you rescue stranded survivors from intensely varied biomes (Ice Peaks, Tropical Islands, Lush Highlands, and Deep Swamps).
+A 3D OpenGL gyrocopter game powered by `freeglut` where you rescue stranded Dwarves from intensely varied Middle-earth biomes (The Shire, The Misty Mountains, Arid Canyons, and Swamps).
 
 ## How to Play
 
@@ -18,8 +18,8 @@ If you wish to re-compile the source code:
 - **W / S**: Pitch forward / backward
 - **A / D**: Bank left / right
 - **Up / Down Arrows**: Increase / Decrease altitude (throttle)
-- **Left / Right Arrows**: Yaw left / right (turn helicopter)
-- **Spacebar**: Toggle Engine ON / OFF
+- **Left / Right Arrows**: Yaw left / right (turn gyrocopter)
+- **Spacebar**: Toggle Steam Engine ON / OFF
 - **C**: Cycle camera modes (Third Person, Cockpit, Cinematic)
 - **Esc**: Exit Game
 

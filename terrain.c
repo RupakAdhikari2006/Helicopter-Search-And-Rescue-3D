@@ -112,38 +112,38 @@ static void generateHeightMap() {
             float n2 = fbm(wx * 0.06f, wz * 0.06f, 3);  // Medium details
             float n3 = fbm(wx * 0.15f, wz * 0.15f, 2);  // Craggy details
 
-            // 3. Setup Biome characteristics
+            // 3. Setup Biome characteristics - more prominent rugged hills
             
-            // North: Majestic Peaks (Misty Mountains)
-            float hN = 2.0f + (n1 * 25.0f);
-            if (n1 > 0.5f) hN += (n1 - 0.5f) * 15.0f + (n3 * 8.0f); // Sharp peaks
+            // North: Higher, more rugged hills
+            float hN = 1.0f + (n1 * 15.0f) + (n2 * 5.0f) + (n3 * 2.0f);
+            if (hN > 15.0f) hN = 15.0f + (hN - 15.0f) * 0.3f;
             
-            // South: Rolling Hills (The Shire)
-            float hS = -1.0f + (n1 * 12.0f) + (n2 * 2.0f); 
-            // Smooth out high peaks
-            if (hS > 6.0f) hS = 6.0f + (hS - 6.0f) * 0.3f;
+            // South: Rolling hills with more depth
+            float hS = 0.5f + (n1 * 10.0f) + (n2 * 3.0f);
+            if (hS > 10.0f) hS = 10.0f + (hS - 10.0f) * 0.2f;
             
-            // East: Rugged Plateaus / Canyons
-            float hE = (n1 * 18.0f) - (n2 * 4.0f);
-            if (hE > 8.0f) hE = 8.0f + (hE - 8.0f) * 0.1f; // Flat tops
+            // East: Higher plateaus and ridges
+            float hE = 0.8f + (n1 * 12.0f) + (n2 * 4.0f);
+            if (hE > 12.0f) hE = 12.0f + (hE - 12.0f) * 0.25f;
             
-            // West: Depressed marshes
-            float hW = -1.5f + (n1 * 4.0f) + (n2 * 1.5f);
+            // West: Deeper valleys and more varied hills
+            float hW = 0.4f + (n1 * 8.0f) + (n2 * 3.0f);
             
             // 4. Blend the regions
             h = hN * wN + hS * wS + hE * wE + hW * wW + 0.5f * wC;
 
-            // 5. Global Island Mask: Ensure edges drop off naturally to the ocean
+            // 5. Global Mask: Flatten edges into rolling meadows, flatten center for helipad
             float dC = (float)sqrt(wx*wx + wz*wz);
             if (dC > 75.0f) {
-                float falloff = (dC - 75.0f) / 10.0f;
-                // Cubic smooth falloff dropping into the ocean
-                h -= falloff * falloff * 4.0f; 
+                float t = (dC - 75.0f) / 15.0f;
+                if (t > 1.0f) t = 1.0f;
+                // Blend toward a gentle meadow height (0.5) at the edges
+                h = h * (1.0f - t) + 0.5f * t;
             } else if (dC < 12.0f) {
                 // Flatten the very center for the helipad base area
                 float blend = dC / 12.0f;
                 h = h * blend + 0.15f * (1.0f - blend);
-                if (h < -0.1f) h = -0.1f;
+                if (h < 0.1f) h = 0.1f;
             }
             
             heightMap[gz][gx] = h;
@@ -209,8 +209,8 @@ void initTerrain() {
         if (tx*tx + tz*tz < 14.0f*14.0f) continue; // Keep helipad clear
         
         float th = getTerrainHeight(tx, tz);
-        // Don't spawn trees underwater or on high snow peaks
-        if (th < 0.25f || th > 16.0f) continue; 
+        // Spawn trees on low grassland up to high green hills
+        if (th < 0.1f || th > 18.0f) continue; 
         
         // SLOPE CHECK: Prevent floating on sheer cliffs
         float slope = getTerrainSlope(tx, tz);
@@ -341,22 +341,31 @@ static void drawBush(BushInstance* b) {
 }
 
 static void drawPerson(float x, float z, int wave) {
+    // Draw a Dwarf (Shorter, wider, earthy colors)
     float h = getTerrainHeight(x, z);
-    glPushMatrix(); glTranslatef(x, h + 0.55f, z);
-    float sk[] = { 0.95f, 0.75f, 0.55f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, sk);
-    glPushMatrix(); glTranslatef(0, 0.8f, 0); glutSolidSphere(0.18, 12, 12); glPopMatrix();
-    float sh[] = { 0.9f, 0.2f, 0.2f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, sh);
-    glPushMatrix(); glTranslatef(0, 0.4f, 0); glScalef(0.35f, 0.65f, 0.22f); glutSolidCube(1.0); glPopMatrix();
-    float pa[] = { 0.2f, 0.3f, 0.6f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pa);
-    glPushMatrix(); glTranslatef(-0.12f, -0.2f, 0); glScalef(0.14f, 0.65f, 0.18f); glutSolidCube(1.0); glPopMatrix();
-    glPushMatrix(); glTranslatef(0.12f, -0.2f, 0); glScalef(0.14f, 0.65f, 0.18f); glutSolidCube(1.0); glPopMatrix();
+    glPushMatrix(); glTranslatef(x, h + 0.45f, z); // Shorter height
+    float sk[] = { 0.95f, 0.8f, 0.65f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, sk);
+    glPushMatrix(); glTranslatef(0, 0.6f, 0); glutSolidSphere(0.2, 12, 12); glPopMatrix(); // Larger head
+    
+    // Tunic (Browns/Greys)
+    float sh[] = { 0.4f, 0.3f, 0.2f, 1.0f }; 
+    if (wave) { sh[0]=0.2f; sh[1]=0.4f; sh[2]=0.2f; } // Some have green cloaks
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, sh);
-    glPushMatrix(); glTranslatef(-0.28f, 0.5f, 0); 
+    glPushMatrix(); glTranslatef(0, 0.25f, 0); glScalef(0.45f, 0.5f, 0.35f); glutSolidCube(1.0); glPopMatrix(); // Wider body
+    
+    // Legs
+    float pa[] = { 0.2f, 0.2f, 0.2f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pa);
+    glPushMatrix(); glTranslatef(-0.15f, -0.15f, 0); glScalef(0.18f, 0.4f, 0.2f); glutSolidCube(1.0); glPopMatrix();
+    glPushMatrix(); glTranslatef(0.15f, -0.15f, 0); glScalef(0.18f, 0.4f, 0.2f); glutSolidCube(1.0); glPopMatrix();
+    
+    // Arms (waving)
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, sh);
+    glPushMatrix(); glTranslatef(-0.35f, 0.3f, 0); 
     if(wave) glRotatef(30+(float)sin(waterTime*5)*30, 0,0,1); else glRotatef(140, 0,0,1);
-    glScalef(0.12f, 0.55f, 0.12f); glutSolidCube(1.0); glPopMatrix();
-    glPushMatrix(); glTranslatef(0.28f, 0.5f, 0); 
+    glScalef(0.15f, 0.45f, 0.15f); glutSolidCube(1.0); glPopMatrix();
+    glPushMatrix(); glTranslatef(0.35f, 0.3f, 0); 
     if(wave) glRotatef(-30-(float)sin(waterTime*5)*30, 0,0,1); else glRotatef(-140, 0,0,1);
-    glScalef(0.12f, 0.55f, 0.12f); glutSolidCube(1.0); glPopMatrix();
+    glScalef(0.15f, 0.45f, 0.15f); glutSolidCube(1.0); glPopMatrix();
     glPopMatrix();
 }
 
@@ -376,62 +385,105 @@ static void drawCampfire(float x, float z) {
 }
 
 static void drawCabin(float x, float z) {
+    // Draw a Hobbit Hole
     float h = getTerrainHeight(x, z);
     glPushMatrix(); glTranslatef(x, h, z);
-    float wd[] = { 0.45f, 0.28f, 0.18f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, wd);
-    glPushMatrix(); glTranslatef(0, 1.1f, 0); glScalef(3.5f, 2.2f, 3.0f); glutSolidCube(1.0); glPopMatrix();
-    float rf[] = { 0.5f, 0.15f, 0.15f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, rf);
-    glPushMatrix(); glTranslatef(0, 2.2f, 0); glScalef(3.8f, 1.4f, 3.2f); glRotatef(-90,1,0,0); glutSolidCone(0.8, 1.2, 4, 1); glPopMatrix();
+    
+    // Green grassy hill base
+    float gr[] = { 0.2f, 0.6f, 0.15f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, gr);
+    glPushMatrix(); glTranslatef(0, -0.5f, 0); glScalef(4.0f, 2.5f, 3.5f); glutSolidSphere(1.0, 16, 16); glPopMatrix();
+    
+    // Round wooden door
+    float wd[] = { 0.35f, 0.2f, 0.1f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, wd);
+    glPushMatrix(); glTranslatef(0, 0.8f, 3.4f); glScalef(1.2f, 1.2f, 0.1f); glutSolidSphere(1.0, 12, 12); glPopMatrix();
+    
+    // Brass Doorknob
+    float br[] = { 0.8f, 0.7f, 0.2f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, br);
+    glPushMatrix(); glTranslatef(0.0f, 0.8f, 3.55f); glutSolidSphere(0.15, 8, 8); glPopMatrix();
+    
     glPopMatrix();
 }
 
 static void drawFuelStation(float x, float z) {
+    // Draw a realistic Fuel/Gas Station
     float h = getTerrainHeight(x, z);
     glPushMatrix(); glTranslatef(x, h, z);
-    float ba[] = { 0.45f, 0.45f, 0.45f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, ba);
-    glPushMatrix(); glTranslatef(0, 0.06f, 0); glScalef(2.8f, 0.12f, 2.8f); glutSolidCube(1.0); glPopMatrix();
-    float tk[] = { 0.88f, 0.88f, 0.88f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tk);
-    glPushMatrix(); glTranslatef(0.7f, 0.9f, 0); glRotatef(90, 0,1,0); 
-    GLUquadric* q = gluNewQuadric(); gluCylinder(q,0.55,0.55,1.4,16,1); gluDisk(q,0,0.55,16,1); glTranslatef(0,0,1.4); gluDisk(q,0,0.55,16,1); gluDeleteQuadric(q); glPopMatrix();
-    float pu[] = { 0.95f, 0.15f, 0.15f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pu);
-    glPushMatrix(); glTranslatef(-0.7f, 0.8f, 0); glScalef(0.5f, 1.6f, 0.6f); glutSolidCube(1.0); glPopMatrix();
+    
+    // --- Concrete base pad ---
+    float pad[] = { 0.72f, 0.72f, 0.70f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pad);
+    glPushMatrix(); glTranslatef(0, 0.05f, 0); glScalef(5.0f, 0.1f, 4.0f); glutSolidCube(1.0); glPopMatrix();
+    
+    // --- Canopy support pillars (2 pillars, red/white) ---
+    float pillar[] = { 0.85f, 0.12f, 0.12f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pillar);
+    glPushMatrix(); glTranslatef(-1.6f, 1.2f, 0); glScalef(0.18f, 2.4f, 0.18f); glutSolidCube(1.0); glPopMatrix();
+    glPushMatrix(); glTranslatef( 1.6f, 1.2f, 0); glScalef(0.18f, 2.4f, 0.18f); glutSolidCube(1.0); glPopMatrix();
+    
+    // --- Canopy roof ---
+    float roof[] = { 0.90f, 0.90f, 0.90f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, roof);
+    glPushMatrix(); glTranslatef(0, 2.45f, 0); glScalef(4.2f, 0.18f, 3.0f); glutSolidCube(1.0); glPopMatrix();
+    // Canopy red trim
+    float trim[] = { 0.85f, 0.12f, 0.12f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, trim);
+    glPushMatrix(); glTranslatef(0, 2.38f, 0); glScalef(4.3f, 0.08f, 3.1f); glutSolidCube(1.0); glPopMatrix();
+    
+    // --- Fuel Pump body ---
+    float pump[] = { 0.15f, 0.50f, 0.20f, 1.0f }; // Green pump body
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pump);
+    glPushMatrix(); glTranslatef(0, 0.75f, 0); glScalef(0.6f, 1.5f, 0.4f); glutSolidCube(1.0); glPopMatrix();
+    
+    // Pump top display screen (dark)
+    float screen[] = { 0.05f, 0.05f, 0.15f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, screen);
+    glPushMatrix(); glTranslatef(0, 1.15f, 0.21f); glScalef(0.38f, 0.35f, 0.05f); glutSolidCube(1.0); glPopMatrix();
+    
+    // Pump nozzle hose (dark grey pipe)
+    float hose[] = { 0.25f, 0.25f, 0.25f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, hose);
+    glPushMatrix(); glTranslatef(0.38f, 0.8f, 0.1f); glScalef(0.08f, 0.6f, 0.08f); glutSolidCube(1.0); glPopMatrix();
+    glPushMatrix(); glTranslatef(0.55f, 0.52f, 0.1f); glRotatef(45,0,0,1); glScalef(0.08f, 0.35f, 0.08f); glutSolidCube(1.0); glPopMatrix();
+    
+    // --- Price sign pole ---
+    float signpole[] = { 0.6f, 0.6f, 0.6f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, signpole);
+    glPushMatrix(); glTranslatef(2.2f, 1.0f, 0); glScalef(0.1f, 2.0f, 0.1f); glutSolidCube(1.0); glPopMatrix();
+    // Sign board (yellow)
+    float sign[] = { 0.95f, 0.80f, 0.05f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, sign);
+    glPushMatrix(); glTranslatef(2.2f, 2.2f, 0); glScalef(0.8f, 0.5f, 0.1f); glutSolidCube(1.0); glPopMatrix();
+    
     glPopMatrix();
 }
 
 static void drawHelipad(float x, float z) {
+    // Dwarven Landing Rune (Stone with glowing inset)
     float h = getTerrainHeight(x, z);
     glPushMatrix(); glTranslatef(x, h + 0.04f, z);
-    float pa[] = { 0.65f, 0.65f, 0.65f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pa);
-    glBegin(GL_QUADS); glNormal3f(0,1,0); glVertex3f(-3.6,0,-3.6); glVertex3f(-3.6,0,3.6); glVertex3f(3.6,0,3.6); glVertex3f(3.6,0,-3.6); glEnd();
-    float hi[] = { 1.0f, 0.95f, 0.1f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, hi);
+    
+    float st[] = { 0.4f, 0.4f, 0.4f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, st);
+    // Octagon base
+    glBegin(GL_POLYGON);
+    glNormal3f(0,1,0); 
+    for(int i=0; i<8; i++) {
+        float a = i * M_PI / 4.0f;
+        glVertex3f(4.0f * cos(a), 0, 4.0f * sin(a));
+    }
+    glEnd();
+    
+    // Glowing dwarven gold rune (Diamond shape)
+    float go[] = { 1.0f, 0.8f, 0.2f, 1.0f }; glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, go);
     glBegin(GL_QUADS); glNormal3f(0,1,0); 
-    glVertex3f(-1.6,0.01,-2.0); glVertex3f(-1.6,0.01,2.0); glVertex3f(-1.1,0.01,2.0); glVertex3f(-1.1,0.01,-2.0);
-    glVertex3f(1.1,0.01,-2.0); glVertex3f(1.1,0.01,2.0); glVertex3f(1.6,0.01,2.0); glVertex3f(1.6,0.01,-2.0);
-    glVertex3f(-1.1,0.01,-0.4); glVertex3f(-1.1,0.01,0.4); glVertex3f(1.1,0.01,0.4); glVertex3f(1.1,0.01,-0.4);
-    glEnd(); glPopMatrix();
+    glVertex3f(0, 0.02f, -2.5f); glVertex3f(2.5f, 0.02f, 0); 
+    glVertex3f(0, 0.02f, 2.5f); glVertex3f(-2.5f, 0.02f, 0);
+    glEnd(); 
+    
+    glPopMatrix();
 }
 
-static void drawOcean() {
-    glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    float wa[] = { 0.18f, 0.45f, 0.8f, 0.6f };
-    float sp[] = { 0.95f, 0.95f, 1.0f, 1.0f };
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, wa);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, sp); glMaterialf(GL_FRONT, GL_SHININESS, 110.0f);
-    glPushMatrix();
-    float wy = -0.55f + 0.18f * (float)sin(waterTime*1.8f);
-    float os = 500.0f;
-    glBegin(GL_QUADS); glNormal3f(0,1,0); glVertex3f(-os,wy,-os); glVertex3f(-os,wy,os); glVertex3f(os,wy,os); glVertex3f(os,wy,-os); glEnd();
-    glPopMatrix();
-    float no[] = {0,0,0,1}; glMaterialfv(GL_FRONT, GL_SPECULAR, no); glDisable(GL_BLEND);
-}
+/* Ocean removed - replaced with green landscape */
 
 static void drawSky() {
     glDisable(GL_LIGHTING); glDisable(GL_DEPTH_TEST);
     glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity(); gluOrtho2D(-1,1,-1,1);
     glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
     glBegin(GL_QUADS);
-    glColor3f(0.15f, 0.32f, 0.62f); glVertex2f(-1, 1); glVertex2f(1, 1);
-    glColor3f(0.6f, 0.8f, 1.0f); glVertex2f(1,-1); glVertex2f(-1,-1);
+    // Deep blue sky at top, warm cream-green horizon (English countryside summer)
+    glColor3f(0.38f, 0.68f, 0.98f); glVertex2f(-1, 1); glVertex2f(1, 1);
+    glColor3f(0.80f, 0.95f, 0.78f); glVertex2f(1,-1); glVertex2f(-1,-1);
     glEnd();
     glPopMatrix(); glMatrixMode(GL_PROJECTION); glPopMatrix(); glMatrixMode(GL_MODELVIEW);
     glEnable(GL_DEPTH_TEST); glEnable(GL_LIGHTING);
@@ -449,14 +501,19 @@ static void computeTriangleNormal(float x0, float y0, float z0, float x1, float 
 void drawTerrain() {
     waterTime += 0.016f; campfireTime += 0.016f;
     drawSky(); 
-    drawOcean();
+    /* No ocean - green landscape replaces it */
     
     float hf = (GRID_SIZE - 1) / 2.0f;
     
-    // EXPLICITLY Disable blending for solid terrain - FIXES TRANSPARENCY BUG
+    // Disable blending for solid opaque terrain
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
+    // Terrain faces have downward normals due to winding - disable back-face culling
+    glDisable(GL_CULL_FACE);
+    float no_spec[] = {0.0f, 0.0f, 0.0f, 1.0f};
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_spec);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
     
     for (int gz = 0; gz < GRID_SIZE - 1; gz++) {
         for (int gx = 0; gx < GRID_SIZE - 1; gx++) {
@@ -465,62 +522,53 @@ void drawTerrain() {
             float h00 = heightMap[gz][gx], h10 = heightMap[gz][gx+1], h01 = heightMap[gz+1][gx], h11 = heightMap[gz+1][gx+1];
             
             float avgH = (h00+h10+h01+h11)*0.25f;
-            if (avgH < -1.2f) continue;
+            if (avgH < -2.0f) continue; // skip only deeply underground patches
 
             float nx, ny, nz;
             
             // Triangle 1
             computeTriangleNormal(x0, h00, z0, x1, h10, z0, x0, h01, z1, &nx, &ny, &nz);
             
-            // Dynamic Coloring based on biome and height
-            float wz0 = (gz - hf)*TERRAIN_SCALE;
-            float wx0 = (gx - hf)*TERRAIN_SCALE;
-            float r, g, b;
-            
-            float distN = -wz0 - (float)fabs(wx0); if (distN < 0) distN = 0;
-            float distS = wz0 - (float)fabs(wx0); if (distS < 0) distS = 0;
-            float distE = wx0 - (float)fabs(wz0); if (distE < 0) distE = 0;
-            float distW = -wx0 - (float)fabs(wz0); if (distW < 0) distW = 0;
-            
-            if (distN >= distS && distN >= distE && distN >= distW) { 
-                // North (Frozen Tundra to Ice Peaks)
-                if (avgH < 0.2f) { r=0.2f; g=0.4f; b=0.3f; } // Deep frosty green lakes
-                else if (avgH < 4.0f) { r=0.15f; g=0.35f; b=0.25f; } // Dark pine frost
-                else if (avgH < 7.0f) { r=0.5f; g=0.6f; b=0.6f; } // Grey rock transition
-                else { r=1.0f; g=1.0f; b=1.0f; } // Pure White Peaks
-            } else if (distS >= distN && distS >= distE && distS >= distW) { 
-                // South (Neon Lush Island - "The Shire")
-                if (avgH < 0.25f) { r=1.0f; g=1.0f; b=0.0f; } // Vibrant Yellow Sand
-                else if (avgH < 3.0f) { r=0.0f; g=1.0f; b=0.0f; } // Very Bright Neon Green
-                else if (avgH < 8.0f) { r=0.1f; g=0.8f; b=0.1f; } // Deep but Bright Jungle
-                else { r=0.3f; g=0.5f; b=0.2f; } // High mossy hills
-            } else if (distE >= distN && distE >= distS && distE >= distW) { 
-                // East (Lush Highlands / Temperate)
-                if (avgH < 0.25f) { r=0.6f; g=0.7f; b=0.2f; } // Yellow-green marsh edges
-                else if (avgH < 6.0f) { r=0.2f; g=0.6f; b=0.15f; } // Rich classic forest green
-                else { r=0.4f; g=0.45f; b=0.35f; } // Mossy gray rock tops
-            } else { 
-                // West (Deep Swamp / Mire)
-                if (avgH < 0.25f) { r=0.3f; g=0.25f; b=0.15f; } // Rich brown mud
-                else if (avgH < 3.0f) { r=0.1f; g=0.4f; b=0.15f; } // Dark, wet swamp grass
-                else { r=0.05f; g=0.25f; b=0.1f; } // Very dark deep pine
+            // Natural earth tones - realistic countryside colors
+            float mat[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+            float t;
+            if (avgH < 0.3f) {
+                // Flat lowland - rich dark soil green
+                mat[0]=0.28f; mat[1]=0.42f; mat[2]=0.14f;
+            } else if (avgH < 1.5f) {
+                // Natural meadow grass
+                t = (avgH - 0.3f) / 1.2f;
+                mat[0]=0.30f-t*0.03f; mat[1]=0.48f+t*0.04f; mat[2]=0.16f-t*0.02f;
+            } else if (avgH < 3.0f) {
+                // Lush hillside green
+                t = (avgH - 1.5f) / 1.5f;
+                mat[0]=0.27f-t*0.04f; mat[1]=0.52f-t*0.06f; mat[2]=0.14f-t*0.02f;
+            } else if (avgH < 5.0f) {
+                // Olive-green upper slopes
+                t = (avgH - 3.0f) / 2.0f;
+                mat[0]=0.23f+t*0.08f; mat[1]=0.46f-t*0.08f; mat[2]=0.12f-t*0.02f;
+            } else {
+                // High hilltop - warm earthy grass
+                t = (avgH - 5.0f) / 2.5f; if (t > 1.0f) t = 1.0f;
+                mat[0]=0.31f+t*0.12f; mat[1]=0.38f+t*0.08f; mat[2]=0.10f+t*0.04f;
             }
-            
-            // Fix Alpha exactly to 1.0f to guarantee opacity
-            float md[] = { r, g, b, 1.0f };
-            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, md);
+            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, mat);
             
             glBegin(GL_TRIANGLES);
-            glNormal3f(nx, ny, nz);
+            // Negate normals so they point UP toward the sun (correct lighting)
+            glNormal3f(-nx, -ny, -nz);
             glVertex3f(x0, h00, z0); glVertex3f(x1, h10, z0); glVertex3f(x0, h01, z1);
             
             // Triangle 2
             computeTriangleNormal(x1, h10, z0, x1, h11, z1, x0, h01, z1, &nx, &ny, &nz);
-            glNormal3f(nx, ny, nz);
+            glNormal3f(-nx, -ny, -nz);
             glVertex3f(x1, h10, z0); glVertex3f(x1, h11, z1); glVertex3f(x0, h01, z1);
             glEnd();
         }
     }
+    
+    // Restore face culling for other objects (helicopter etc.)
+    glEnable(GL_CULL_FACE);
     
     drawHelipad(0,0); drawCabin(8.5f, -6.5f);
     for(int i=0; i<NUM_FUEL_STATIONS; i++) drawFuelStation(fuelStations[i].x, fuelStations[i].z);
